@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RyConvert</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #0a0a0b;
+            --bg-secondary: #111113;
+            --bg-card: #161618;
+            --bg-elevated: #1c1c1f;
+            --fg-primary: #fafafa;
+            --fg-secondary: #a1a1aa;
+            --fg-muted: #52525b;
+            --accent: #e85d4c;
+            --accent-hover: #f06b5a;
+            --accent-glow: rgba(232, 93, 76, 0.3);
+            --border: #27272a;
+            --border-light: #3f3f46;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--fg-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .font-display {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(232, 93, 76, 0.08), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(232, 93, 76, 0.05), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-grid {
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 64px 64px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-noise {
+            position: fixed;
+            inset: 0;
+            opacity: 0.3;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            mix-blend-mode: overlay;
+        }
+
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(10, 10, 11, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, var(--fg-primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            margin-left: 2px;
+            -webkit-text-fill-color: initial;
+        }
+
+        .main-container {
+            position: relative;
+            z-index: 1;
+            min-height: 100vh;
+            padding: 8rem 1.5rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.25rem;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeUp 0.8s ease forwards;
+        }
+
+        .hero-subtitle {
+            font-size: 1.125rem;
+            color: var(--fg-secondary);
+            max-width: 500px;
+            margin: 0 auto 1rem;
+            line-height: 1.6;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.8s ease 0.15s forwards;
+        }
+
+        .privacy-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 100px;
+            font-size: 0.875rem;
+            color: var(--success);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.8s ease 0.3s forwards;
+        }
+
+        .privacy-badge svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .upload-zone {
+            position: relative;
+            margin: 2rem auto;
+            max-width: 680px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUp 0.8s ease 0.4s forwards;
+        }
+
+        .upload-area {
+            position: relative;
+            padding: 4rem 2rem;
+            border: 2px dashed var(--border-light);
+            border-radius: 24px;
+            background: var(--bg-card);
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(232, 93, 76, 0.06), transparent 50%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .upload-area:hover::before,
+        .upload-area.drag-over::before {
+            opacity: 1;
+        }
+
+        .upload-area:hover {
+            border-color: var(--accent);
+            background: var(--bg-elevated);
+            transform: translateY(-2px);
+        }
+
+        .upload-area.drag-over {
+            border-color: var(--accent);
+            background: var(--bg-elevated);
+            transform: scale(1.02);
+            box-shadow: 0 0 60px var(--accent-glow);
+        }
+
+        .upload-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1.5rem;
+            color: var(--fg-muted);
+            transition: all 0.4s ease;
+        }
+
+        .upload-area:hover .upload-icon,
+        .upload-area.drag-over .upload-icon {
+            color: var(--accent);
+            transform: translateY(-4px);
+        }
+
+        .upload-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.375rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-subtext {
+            color: var(--fg-muted);
+            font-size: 0.9375rem;
+        }
+
+        .upload-formats {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .format-tag {
+            padding: 0.375rem 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--fg-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s ease;
+        }
+
+        .upload-area:hover .format-tag {
+            border-color: var(--border-light);
+            color: var(--fg-primary);
+        }
+
+        .file-input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .preview-section {
+            display: none;
+            margin: 2rem auto;
+            max-width: 680px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .preview-section.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .preview-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .preview-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .file-icon {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        .file-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .file-icon.image { color: #22c55e; background: rgba(34, 197, 94, 0.1); }
+        .file-icon.audio { color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
+        .file-icon.video { color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+        .file-icon.document { color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
+        .file-icon.spreadsheet { color: #10b981; background: rgba(16, 185, 129, 0.1); }
+        .file-icon.presentation { color: #ec4899; background: rgba(236, 72, 153, 0.1); }
+        .file-icon.archive { color: #f97316; background: rgba(249, 115, 22, 0.1); }
+        .file-icon.unknown { color: var(--fg-muted); }
+
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.875rem;
+            color: var(--fg-muted);
+        }
+
+        .remove-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--fg-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .remove-btn:hover {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .image-preview {
+            position: relative;
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 0 auto;
+            display: block;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+
+        .audio-preview {
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+        }
+
+        .audio-preview audio {
+            width: 100%;
+        }
+
+        .video-preview {
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+        }
+
+        .video-preview video {
+            max-width: 100%;
+            max-height: 300px;
+            margin: 0 auto;
+            display: block;
+            border-radius: 12px;
+        }
+
+        .text-preview {
+            padding: 1.5rem;
+            background: var(--bg-secondary);
+            max-height: 200px;
+            overflow: auto;
+        }
+
+        .text-preview pre {
+            font-family: 'DM Sans', monospace;
+            font-size: 0.875rem;
+            color: var(--fg-secondary);
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 0;
+        }
+
+        .conversion-options {
+            padding: 1.5rem;
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .option-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .option-label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--fg-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper::after {
+            content: '';
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid var(--fg-muted);
+            pointer-events: none;
+        }
+
+        .format-select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            background: var(--bg-elevated);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            color: var(--fg-primary);
+            font-size: 0.9375rem;
+            font-family: inherit;
+            cursor: pointer;
+            appearance: none;
+            transition: all 0.2s ease;
+        }
+
+        .format-select:hover {
+            border-color: var(--border-light);
+        }
+
+        .format-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .quality-slider {
+            width: 100%;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: var(--bg-elevated);
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-value {
+            font-size: 0.875rem;
+            color: var(--fg-secondary);
+            min-width: 3rem;
+            text-align: right;
+        }
+
+        .convert-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 1rem 2rem;
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, var(--accent) 0%, #d14d3d 100%);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .convert-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, var(--accent-hover) 0%, var(--accent) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .convert-btn:hover::before {
+            opacity: 1;
+        }
+
+        .convert-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--accent-glow);
+        }
+
+        .convert-btn:active {
+            transform: translateY(0);
+        }
+
+        .convert-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .convert-btn span,
+        .convert-btn svg {
+            position: relative;
+            z-index: 1;
+        }
+
+        .convert-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .progress-section {
+            display: none;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .progress-section.visible {
+            display: block;
+        }
+
+        .progress-bar-container {
+            height: 8px;
+            background: var(--bg-elevated);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.875rem;
+            color: var(--fg-secondary);
+        }
+
+        .download-section {
+            display: none;
+            padding: 1.5rem;
+            text-align: center;
+            background: rgba(34, 197, 94, 0.05);
+            border-top: 1px solid rgba(34, 197, 94, 0.1);
+        }
+
+        .download-section.visible {
+            display: block;
+        }
+
+        .success-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            background: rgba(34, 197, 94, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--success);
+        }
+
+        .success-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .size-comparison {
+            font-size: 0.875rem;
+            color: var(--fg-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.75rem;
+            background: var(--success);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .new-conversion-btn {
+            display: block;
+            margin: 1rem auto 0;
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--fg-secondary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .new-conversion-btn:hover {
+            border-color: var(--fg-muted);
+            color: var(--fg-primary);
+        }
+
+        .error-section {
+            display: none;
+            padding: 1.5rem;
+            text-align: center;
+            background: rgba(239, 68, 68, 0.05);
+            border-top: 1px solid rgba(239, 68, 68, 0.1);
+        }
+
+        .error-section.visible {
+            display: block;
+        }
+
+        .error-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--error);
+        }
+
+        .error-text {
+            font-size: 1rem;
+            color: var(--error);
+            margin-bottom: 0.5rem;
+        }
+
+        .error-detail {
+            font-size: 0.875rem;
+            color: var(--fg-secondary);
+        }
+
+        .footer {
+            margin-top: 4rem;
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border);
+        }
+
+        .footer-text {
+            font-size: 0.875rem;
+            color: var(--fg-muted);
+        }
+
+        @keyframes fadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .main-container {
+                padding: 6rem 1rem 2rem;
+            }
+
+            .hero-title {
+                font-size: 2rem;
+            }
+
+            .upload-area {
+                padding: 3rem 1.5rem;
+            }
+
+            .preview-header {
+                flex-wrap: wrap;
+            }
+
+            .option-row {
+                flex-direction: column;
+            }
+
+            .option-group {
+                width: 100%;
+            }
+        }
+
+        *:focus-visible {
+            outline: 2px solid var(--accent);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    <div class="bg-grid"></div>
+    <div class="bg-noise"></div>
+
+    <header class="header">
+        <div class="flex items-center justify-between max-w-6xl mx-auto">
+            <div class="logo">
+                RyConvert<span class="logo-dot"></span>
+            </div>
+            <div class="hidden sm:flex items-center gap-2 text-sm" style="color: var(--fg-muted);">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                100% Client-Side Processing
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <section class="hero">
+            <h1 class="hero-title">Convert Files,<br>Privately.</h1>
+            <p class="hero-subtitle">
+                Transform your images, audio, video, and documents instantly. 
+                No uploads to external servers. Your files never leave your device.
+            </p>
+            <div class="privacy-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <polyline points="9,12 11,14 15,10"></polyline>
+                </svg>
+                Data protection is important! No data is sent. The magic happens in your browser.
+            </div>
+        </section>
+
+        <div class="upload-zone">
+            <div class="upload-area" id="uploadArea">
+                <input type="file" class="file-input" id="fileInput" aria-label="Upload file">
+                
+                <div class="upload-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                </div>
+                
+                <p class="upload-text">Drop your file here</p>
+                <p class="upload-subtext">or click to browse from your device</p>
+                
+                <div class="upload-formats">
+                    <span class="format-tag">PNG</span>
+                    <span class="format-tag">JPG</span>
+                    <span class="format-tag">WebP</span>
+                    <span class="format-tag">MP3</span>
+                    <span class="format-tag">WAV</span>
+                    <span class="format-tag">MP4</span>
+                    <span class="format-tag">PDF</span>
+                    <span class="format-tag">CSV</span>
+                    <span class="format-tag">ZIP</span>
+                </div>
+            </div>
+        </div>
+
+        <section class="preview-section" id="previewSection">
+            <div class="preview-card">
+                <div class="preview-header">
+                    <div class="file-icon" id="fileIcon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name" id="fileName">filename.ext</div>
+                        <div class="file-meta">
+                            <span id="fileSize">0 KB</span>
+                            <span id="fileType">Unknown</span>
+                        </div>
+                    </div>
+                    <button class="remove-btn" id="removeBtn" aria-label="Remove file">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="image-preview" id="imagePreview" style="display: none;">
+                    <img id="previewImage" src="" alt="Preview">
+                </div>
+
+                <div class="audio-preview" id="audioPreview" style="display: none;">
+                    <audio id="previewAudio" controls></audio>
+                </div>
+
+                <div class="video-preview" id="videoPreview" style="display: none;">
+                    <video id="previewVideo" controls></video>
+                </div>
+
+                <div class="text-preview" id="textPreview" style="display: none;">
+                    <pre id="previewText"></pre>
+                </div>
+
+                <div class="conversion-options" id="conversionOptions">
+                    <div class="option-row">
+                        <div class="option-group">
+                            <label class="option-label">Convert to</label>
+                            <div class="select-wrapper">
+                                <select class="format-select" id="outputFormat" aria-label="Select output format">
+                                    <option value="">Select output format</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="option-group" id="qualityGroup" style="display: none;">
+                            <label class="option-label">Quality</label>
+                            <div class="slider-container">
+                                <input type="range" class="slider" id="qualitySlider" min="10" max="100" value="85" aria-label="Quality slider">
+                                <span class="slider-value" id="qualityValue">85%</span>
+                            </div>
+                        </div>
+                        <div class="option-group" id="audioOptionsGroup" style="display: none;">
+                            <label class="option-label">Sample Rate</label>
+                            <div class="select-wrapper">
+                                <select class="format-select" id="sampleRateSelect" aria-label="Select sample rate">
+                                    <option value="44100">44.1 kHz</option>
+                                    <option value="48000">48 kHz</option>
+                                    <option value="22050">22.05 kHz</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="convert-btn" id="convertBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="16 3 21 3 21 8"></polyline>
+                            <line x1="4" y1="20" x2="21" y2="3"></line>
+                            <polyline points="21 16 21 21 16 21"></polyline>
+                            <line x1="15" y1="15" x2="21" y2="21"></line>
+                            <line x1="4" y1="4" x2="9" y2="9"></line>
+                        </svg>
+                        <span>Convert File</span>
+                    </button>
+                </div>
+
+                <div class="progress-section" id="progressSection">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <p class="progress-text" id="progressText">Converting...</p>
+                </div>
+
+                <div class="download-section" id="downloadSection">
+                    <div class="success-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                    </div>
+                    <p class="success-text">Conversion Complete</p>
+                    <p class="size-comparison" id="sizeComparison">Original: 0 KB → Converted: 0 KB</p>
+                    <button class="download-btn" id="downloadBtn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download File
+                    </button>
+                    <button class="new-conversion-btn" id="newConversionBtn">Start New Conversion</button>
+                </div>
+
+                <div class="error-section" id="errorSection">
+                    <div class="error-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="15" y1="9" x2="9" y2="15"></line>
+                            <line x1="9" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                    </div>
+                    <p class="error-text" id="errorText">Conversion Failed</p>
+                    <p class="error-detail" id="errorDetail">An error occurred during conversion.</p>
+                    <button class="new-conversion-btn" id="retryBtn">Try Again</button>
+                </div>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <p class="footer-text">Built with privacy in mind. No tracking, no uploads, no compromise.</p>
+        </footer>
+    </main>
+
+    <script>
+        const FORMAT_CONFIG = {
+            image: {
+                name: 'Image',
+                color: '#22c55e',
+                inputs: ['png', 'jpg', 'jpeg', 'webp', 'gif', 'bmp', 'tiff', 'tif', 'heic', 'avif', 'raw'],
+                outputs: ['png', 'jpg', 'webp', 'bmp'],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>`
+            },
+            audio: {
+                name: 'Audio',
+                color: '#8b5cf6',
+                inputs: ['mp3', 'wav', 'ogg', 'm4a', 'flac', 'aac', 'opus'],
+                outputs: ['wav', 'mp3'],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>`
+            },
+            video: {
+                name: 'Video',
+                color: '#f59e0b',
+                inputs: ['mp4', 'webm', 'mov', 'avi', 'mkv'],
+                outputs: ['webm', 'mp4'],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>`
+            },
+            document: {
+                name: 'Document',
+                color: '#3b82f6',
+                inputs: ['pdf', 'docx', 'txt', 'html', 'md', 'rtf'],
+                outputs: ['pdf', 'txt', 'html'],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>`
+            },
+            spreadsheet: {
+                name: 'Spreadsheet',
+                color: '#10b981',
+                inputs: ['xlsx', 'xls', 'csv', 'tsv'],
+                outputs: ['csv', 'json'],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="8" y1="13" x2="16" y2="13"></line><line x1="8" y1="17" x2="16" y2="17"></line></svg>`
+            },
+            presentation: {
+                name: 'Presentation',
+                color: '#ec4899',
+                inputs: ['pptx', 'ppt', 'odp'],
+                outputs: ['pdf'],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`
+            },
+            archive: {
+                name: 'Archive',
+                color: '#f97316',
+                inputs: ['zip', 'tar', 'gz', 'tar.gz', '7z', 'rar'],
+                outputs: ['zip'],
+                icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"></path><path d="M1 3h22v5H1z"></path><path d="M10 12h4"></path></svg>`
+            }
+        };
+
+        const state = {
+            currentFile: null,
+            currentCategory: null,
+            convertedBlob: null,
+            convertedFileName: null,
+            originalSize: 0,
+            audioContext: null
+        };
+
+        const elements = {
+            uploadArea: document.getElementById('uploadArea'),
+            fileInput: document.getElementById('fileInput'),
+            previewSection: document.getElementById('previewSection'),
+            fileIcon: document.getElementById('fileIcon'),
+            fileName: document.getElementById('fileName'),
+            fileSize: document.getElementById('fileSize'),
+            fileType: document.getElementById('fileType'),
+            imagePreview: document.getElementById('imagePreview'),
+            previewImage: document.getElementById('previewImage'),
+            audioPreview: document.getElementById('audioPreview'),
+            previewAudio: document.getElementById('previewAudio'),
+            videoPreview: document.getElementById('videoPreview'),
+            previewVideo: document.getElementById('previewVideo'),
+            textPreview: document.getElementById('textPreview'),
+            previewText: document.getElementById('previewText'),
+            outputFormat: document.getElementById('outputFormat'),
+            qualityGroup: document.getElementById('qualityGroup'),
+            qualitySlider: document.getElementById('qualitySlider'),
+            qualityValue: document.getElementById('qualityValue'),
+            audioOptionsGroup: document.getElementById('audioOptionsGroup'),
+            sampleRateSelect: document.getElementById('sampleRateSelect'),
+            convertBtn: document.getElementById('convertBtn'),
+            progressSection: document.getElementById('progressSection'),
+            progressBar: document.getElementById('progressBar'),
+            progressText: document.getElementById('progressText'),
+            downloadSection: document.getElementById('downloadSection'),
+            sizeComparison: document.getElementById('sizeComparison'),
+            downloadBtn: document.getElementById('downloadBtn'),
+            newConversionBtn: document.getElementById('newConversionBtn'),
+            errorSection: document.getElementById('errorSection'),
+            errorText: document.getElementById('errorText'),
+            errorDetail: document.getElementById('errorDetail'),
+            retryBtn: document.getElementById('retryBtn'),
+            removeBtn: document.getElementById('removeBtn')
+        };
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function getFileExtension(filename) {
+            const parts = filename.toLowerCase().split('.');
+            if (parts.length > 2 && parts[parts.length - 2] === 'tar') {
+                return 'tar.' + parts[parts.length - 1];
+            }
+            return parts.pop();
+        }
+
+        function detectCategory(extension) {
+            for (const [category, config] of Object.entries(FORMAT_CONFIG)) {
+                if (config.inputs.includes(extension)) {
+                    return category;
+                }
+            }
+            return null;
+        }
+
+        function updateOutputFormats(category, currentExt) {
+            const select = elements.outputFormat;
+            select.innerHTML = '<option value="">Select output format</option>';
+            
+            if (!category) return;
+            
+            const config = FORMAT_CONFIG[category];
+            const outputs = config.outputs.filter(ext => ext !== currentExt);
+            
+            outputs.forEach(format => {
+                const option = document.createElement('option');
+                option.value = format;
+                option.textContent = format.toUpperCase();
+                select.appendChild(option);
+            });
+        }
+
+        function showProgress(show = true) {
+            elements.progressSection.classList.toggle('visible', show);
+            elements.conversionOptions.style.display = show ? 'none' : 'block';
+            if (show) {
+                elements.progressBar.style.width = '0%';
+            }
+        }
+
+        function updateProgress(percent, text) {
+            elements.progressBar.style.width = `${percent}%`;
+            elements.progressText.textContent = text;
+        }
+
+        function showDownload(originalSize, newSize) {
+            elements.progressSection.classList.remove('visible');
+            elements.downloadSection.classList.add('visible');
+            elements.sizeComparison.textContent = `Original: ${formatFileSize(originalSize)} → Converted: ${formatFileSize(newSize)}`;
+        }
+
+        function showError(title, detail) {
+            elements.progressSection.classList.remove('visible');
+            elements.conversionOptions.style.display = 'none';
+            elements.errorSection.classList.add('visible');
+            elements.errorText.textContent = title;
+            elements.errorDetail.textContent = detail;
+        }
+
+        function resetUI() {
+            state.currentFile = null;
+            state.currentCategory = null;
+            state.convertedBlob = null;
+            state.convertedFileName = null;
+            state.originalSize = 0;
+            
+            elements.previewSection.classList.remove('visible');
+            elements.downloadSection.classList.remove('visible');
+            elements.errorSection.classList.remove('visible');
+            elements.progressSection.classList.remove('visible');
+            elements.conversionOptions.style.display = 'block';
+            elements.imagePreview.style.display = 'none';
+            elements.audioPreview.style.display = 'none';
+            elements.videoPreview.style.display = 'none';
+            elements.textPreview.style.display = 'none';
+            elements.outputFormat.innerHTML = '<option value="">Select output format</option>';
+            elements.fileInput.value = '';
+            
+            if (elements.previewAudio.src) {
+                elements.previewAudio.pause();
+                elements.previewAudio.src = '';
+            }
+            if (elements.previewVideo.src) {
+                elements.previewVideo.pause();
+                elements.previewVideo.src = '';
+            }
+        }
+
+        function handleFile(file) {
+            if (!file) return;
+            
+            const extension = getFileExtension(file.name);
+            const category = detectCategory(extension);
+            
+            if (!category) {
+                showError('Unsupported Format', `.${extension} files are not supported. Please try another file.`);
+                elements.previewSection.classList.add('visible');
+                elements.conversionOptions.style.display = 'none';
+                return;
+            }
+            
+            state.currentFile = file;
+            state.currentCategory = category;
+            state.originalSize = file.size;
+            
+            const config = FORMAT_CONFIG[category];
+            elements.fileIcon.innerHTML = config.icon;
+            elements.fileIcon.className = `file-icon ${category}`;
+            elements.fileName.textContent = file.name;
+            elements.fileSize.textContent = formatFileSize(file.size);
+            elements.fileType.textContent = config.name;
+            
+            updateOutputFormats(category, extension);
+            
+            elements.imagePreview.style.display = 'none';
+            elements.audioPreview.style.display = 'none';
+            elements.videoPreview.style.display = 'none';
+            elements.textPreview.style.display = 'none';
+            elements.qualityGroup.style.display = 'none';
+            elements.audioOptionsGroup.style.display = 'none';
+            
+            if (category === 'image') {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    elements.previewImage.src = e.target.result;
+                    elements.imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+                elements.qualityGroup.style.display = 'block';
+            } else if (category === 'audio') {
+                const url = URL.createObjectURL(file);
+                elements.previewAudio.src = url;
+                elements.audioPreview.style.display = 'block';
+                elements.audioOptionsGroup.style.display = 'block';
+            } else if (category === 'video') {
+                const url = URL.createObjectURL(file);
+                elements.previewVideo.src = url;
+                elements.videoPreview.style.display = 'block';
+            } else if (category === 'document' || category === 'spreadsheet') {
+                if (extension === 'txt' || extension === 'html' || extension === 'md' || extension === 'csv' || extension === 'tsv' || extension === 'json') {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        elements.previewText.textContent = e.target.result.substring(0, 5000);
+                        elements.textPreview.style.display = 'block';
+                    };
+                    reader.readAsText(file);
+                }
+            }
+            
+            elements.downloadSection.classList.remove('visible');
+            elements.errorSection.classList.remove('visible');
+            elements.conversionOptions.style.display = 'block';
+            
+            elements.previewSection.classList.add('visible');
+        }
+
+        async function convertImage(file, outputFormat, quality) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(file);
+                
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(img, 0, 0);
+                    
+                    let mimeType;
+                    switch (outputFormat) {
+                        case 'jpg': mimeType = 'image/jpeg'; break;
+                        case 'webp': mimeType = 'image/webp'; break;
+                        case 'png': mimeType = 'image/png'; break;
+                        case 'bmp': mimeType = 'image/bmp'; break;
+                        default: mimeType = 'image/png';
+                    }
+                    
+                    const qualityValue = outputFormat === 'png' ? undefined : quality / 100;
+                    
+                    canvas.toBlob((blob) => {
+                        if (blob) {
+                            resolve(blob);
+                        } else {
+                            reject(new Error('Failed to create image blob'));
+                        }
+                    }, mimeType, qualityValue);
+                };
+                
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    reject(new Error('Failed to load image'));
+                };
+                
+                img.src = url;
+            });
+        }
+
+        async function convertAudio(file, outputFormat, sampleRate) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)({
+                sampleRate: parseInt(sampleRate)
+            });
+            
+            const arrayBuffer = await file.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            
+            const numChannels = audioBuffer.numberOfChannels;
+            const length = audioBuffer.length;
+            const sampleRateOut = audioBuffer.sampleRate;
+            
+            const wavBuffer = encodeWAV(audioBuffer, numChannels, sampleRateOut);
+            
+            audioContext.close();
+            
+            return new Blob([wavBuffer], { type: 'audio/wav' });
+        }
+
+        function encodeWAV(audioBuffer, numChannels, sampleRate) {
+            const length = audioBuffer.length * numChannels * 2 + 44;
+            const buffer = new ArrayBuffer(length);
+            const view = new DataView(buffer);
+            
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, length - 8, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * numChannels * 2, true);
+            view.setUint16(32, numChannels * 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, length - 44, true);
+            
+            const channels = [];
+            for (let i = 0; i < numChannels; i++) {
+                channels.push(audioBuffer.getChannelData(i));
+            }
+            
+            let offset = 44;
+            for (let i = 0; i < audioBuffer.length; i++) {
+                for (let ch = 0; ch < numChannels; ch++) {
+                    const sample = Math.max(-1, Math.min(1, channels[ch][i]));
+                    view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                    offset += 2;
+                }
+            }
+            
+            return buffer;
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        async function convertVideo(file, outputFormat) {
+            if (outputFormat === 'webm') {
+                return await transcodeVideoToWebM(file);
+            } else if (outputFormat === 'mp4') {
+                throw new Error('MP4 encoding requires server processing. WebM is available for client-side conversion.');
+            }
+        }
+
+        async function transcodeVideoToWebM(file) {
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(file);
+            video.muted = true;
+            
+            await new Promise((resolve, reject) => {
+                video.onloadedmetadata = resolve;
+                video.onerror = reject;
+            });
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            const ctx = canvas.getContext('2d');
+            
+            const stream = canvas.captureStream(30);
+            
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const destination = audioCtx.createMediaStreamDestination();
+            
+            try {
+                const source = audioCtx.createMediaElementSource(video);
+                source.connect(destination);
+                source.connect(audioCtx.destination);
+                
+                const audioTrack = destination.stream.getAudioTracks()[0];
+                if (audioTrack) {
+                    stream.addTrack(audioTrack);
+                }
+            } catch (e) {
+                console.log('No audio track or audio processing failed');
+            }
+            
+            const mediaRecorder = new MediaRecorder(stream, {
+                mimeType: 'video/webm;codecs=vp9',
+                videoBitsPerSecond: 2500000
+            });
+            
+            const chunks = [];
+            
+            return new Promise((resolve, reject) => {
+                mediaRecorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) {
+                        chunks.push(e.data);
+                    }
+                };
+                
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(chunks, { type: 'video/webm' });
+                    URL.revokeObjectURL(video.src);
+                    audioCtx.close();
+                    resolve(blob);
+                };
+                
+                mediaRecorder.onerror = reject;
+                
+                video.play();
+                mediaRecorder.start();
+                
+                const drawFrame = () => {
+                    if (video.paused || video.ended) {
+                        mediaRecorder.stop();
+                        return;
+                    }
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    requestAnimationFrame(drawFrame);
+                };
+                
+                video.onended = () => {
+                    mediaRecorder.stop();
+                };
+                
+                drawFrame();
+            });
+        }
+
+        async function convertDocument(file, outputFormat, inputExt) {
+            if (outputFormat === 'txt') {
+                if (inputExt === 'txt' || inputExt === 'md' || inputExt === 'html') {
+                    return file;
+                }
+                throw new Error('Cannot extract text from this document type. Only plain text files are supported.');
+            }
+            
+            if (outputFormat === 'html') {
+                if (inputExt === 'html') {
+                    return file;
+                }
+                if (inputExt === 'txt' || inputExt === 'md') {
+                    const text = await file.text();
+                    const html = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Converted Document</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; line-height: 1.6; }
+pre { white-space: pre-wrap; word-wrap: break-word; }
+</style>
+</head>
+<body>
+<pre>${escapeHtml(text)}</pre>
+</body>
+</html>`;
+                    return new Blob([html], { type: 'text/html' });
+                }
+            }
+            
+            if (outputFormat === 'pdf') {
+                return await createPDFFromDocument(file, inputExt);
+            }
+            
+            throw new Error(`Conversion from ${inputExt} to ${outputFormat} is not yet supported.`);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        async function createPDFFromDocument(file, inputExt) {
+            let text = '';
+            if (inputExt === 'txt' || inputExt === 'md') {
+                text = await file.text();
+            } else {
+                throw new Error('PDF creation from this format requires server processing.');
+            }
+            
+            const pdf = createSimplePDF(text);
+            return new Blob([pdf], { type: 'application/pdf' });
+        }
+
+        function createSimplePDF(text) {
+            const lines = text.split('\n');
+            const pageHeight = 792;
+            const pageWidth = 612;
+            const margin = 72;
+            const lineHeight = 14;
+            const charsPerLine = 80;
+            
+            const pages = [];
+            let currentY = pageHeight - margin;
+            let currentPage = [];
+            
+            for (const line of lines) {
+                const wrappedLines = wrapText(line, charsPerLine);
+                for (const wrappedLine of wrappedLines) {
+                    if (currentY < margin + lineHeight) {
+                        pages.push([...currentPage]);
+                        currentPage = [];
+                        currentY = pageHeight - margin;
+                    }
+                    currentPage.push({ text: wrappedLine, y: currentY });
+                    currentY -= lineHeight;
+                }
+            }
+            if (currentPage.length > 0) {
+                pages.push(currentPage);
+            }
+            
+            let pdf = '%PDF-1.4\n';
+            const objects = [];
+            
+            objects.push(null);
+            
+            objects.push('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+            
+            let pagesContent = '2 0 obj\n<< /Type /Pages /Kids [';
+            const pageObjRefs = [];
+            for (let i = 0; i < pages.length; i++) {
+                pageObjRefs.push(3 + i * 2);
+            }
+            pagesContent += pageObjRefs.map(ref => `${ref} 0 R`).join(' ');
+            pagesContent += `] /Count ${pages.length} >>\nendobj\n`;
+            objects.push(pagesContent);
+            
+            for (let i = 0; i < pages.length; i++) {
+                const pageObj = 3 + i * 2;
+                const contentObj = pageObj + 1;
+                
+                objects.push(`${pageObj} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Contents ${contentObj} 0 R /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Courier >> >> >> >>\nendobj\n`);
+                
+                let stream = 'BT\n/F1 12 Tf\n';
+                for (const item of pages[i]) {
+                    const escapedText = item.text.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+                    stream += `1 ${item.y} Td (${escapedText}) Tj\n0 -${lineHeight} Td\n`;
+                }
+                stream += 'ET\n';
+                
+                objects.push(`${contentObj} 0 obj\n<< /Length ${stream.length} >>\nstream\n${stream}endstream\nendobj\n`);
+            }
+            
+            const offsets = [];
+            let offset = pdf.length;
+            
+            for (const obj of objects) {
+                if (obj === null) continue;
+                offsets.push(offset);
+                pdf += obj;
+                offset += obj.length;
+            }
+            
+            const xrefStart = pdf.length;
+            pdf += 'xref\n';
+            pdf += `0 ${objects.length}\n`;
+            pdf += '0000000000 65535 f \n';
+            
+            for (let i = 1; i < objects.length; i++) {
+                pdf += offsets[i - 1].toString().padStart(10, '0') + ' 00000 n \n';
+            }
+            
+            pdf += 'trailer\n';
+            pdf += `<< /Size ${objects.length} /Root 1 0 R >>\n`;
+            pdf += 'startxref\n';
+            pdf += `${xrefStart}\n`;
+            pdf += '%%EOF\n';
+            
+            return pdf;
+        }
+
+        function wrapText(text, maxChars) {
+            if (text.length <= maxChars) {
+                return [text];
+            }
+            
+            const lines = [];
+            let currentLine = '';
+            const words = text.split(' ');
+            
+            for (const word of words) {
+                if (currentLine.length + word.length + 1 <= maxChars) {
+                    currentLine += (currentLine ? ' ' : '') + word;
+                } else {
+                    if (currentLine) lines.push(currentLine);
+                    if (word.length > maxChars) {
+                        for (let i = 0; i < word.length; i += maxChars) {
+                            lines.push(word.substring(i, i + maxChars));
+                        }
+                        currentLine = '';
+                    } else {
+                        currentLine = word;
+                    }
+                }
+            }
+            if (currentLine) lines.push(currentLine);
+            
+            return lines;
+        }
+
+        async function convertSpreadsheet(file, outputFormat, inputExt) {
+            if (inputExt === 'csv' || inputExt === 'tsv') {
+                const text = await file.text();
+                
+                if (outputFormat === 'csv') {
+                    return new Blob([text], { type: 'text/csv' });
+                }
+                
+                if (outputFormat === 'json') {
+                    const delimiter = inputExt === 'tsv' ? '\t' : ',';
+                    const data = parseCSV(text, delimiter);
+                    const json = JSON.stringify(data, null, 2);
+                    return new Blob([json], { type: 'application/json' });
+                }
+            }
+            
+            if (inputExt === 'xlsx' || inputExt === 'xls') {
+                throw new Error('Excel file parsing requires additional libraries. CSV/TSV files are fully supported.');
+            }
+            
+            throw new Error(`Conversion from ${inputExt} to ${outputFormat} is not supported.`);
+        }
+
+        function parseCSV(text, delimiter = ',') {
+            const lines = text.split(/\r?\n/).filter(line => line.trim());
+            if (lines.length === 0) return [];
+            
+            const headers = parseCSVLine(lines[0], delimiter);
+            const result = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i], delimiter);
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header.trim()] = values[index] || '';
+                });
+                result.push(row);
+            }
+            
+            return result;
+        }
+
+        function parseCSVLine(line, delimiter) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                const nextChar = line[i + 1];
+                
+                if (inQuotes) {
+                    if (char === '"' && nextChar === '"') {
+                        current += '"';
+                        i++;
+                    } else if (char === '"') {
+                        inQuotes = false;
+                    } else {
+                        current += char;
+                    }
+                } else {
+                    if (char === '"') {
+                        inQuotes = true;
+                    } else if (char === delimiter) {
+                        result.push(current);
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+            }
+            result.push(current);
+            
+            return result;
+        }
+
+        async function convertPresentation(file, outputFormat) {
+            throw new Error('Presentation conversion requires server processing. This feature is coming soon.');
+        }
+
+        async function convertArchive(file, outputFormat, inputExt) {
+            if (inputExt === 'zip' && outputFormat === 'zip') {
+                return file;
+            }
+            
+            throw new Error('Archive conversion requires additional libraries. ZIP files can be passed through.');
+        }
+
+        async function performConversion() {
+            const outputFormat = elements.outputFormat.value;
+            
+            if (!outputFormat) {
+                showError('No Format Selected', 'Please select an output format before converting.');
+                return;
+            }
+            
+            if (!state.currentFile) {
+                showError('No File', 'Please upload a file first.');
+                return;
+            }
+            
+            const quality = parseInt(elements.qualitySlider.value);
+            const sampleRate = elements.sampleRateSelect.value;
+            const inputExt = getFileExtension(state.currentFile.name);
+            
+            showProgress(true);
+            updateProgress(10, 'Preparing file...');
+            
+            try {
+                let blob;
+                
+                updateProgress(30, 'Converting...');
+                
+                switch (state.currentCategory) {
+                    case 'image':
+                        blob = await convertImage(state.currentFile, outputFormat, quality);
+                        break;
+                    case 'audio':
+                        blob = await convertAudio(state.currentFile, outputFormat, sampleRate);
+                        break;
+                    case 'video':
+                        blob = await convertVideo(state.currentFile, outputFormat);
+                        break;
+                    case 'document':
+                        blob = await convertDocument(state.currentFile, outputFormat, inputExt);
+                        break;
+                    case 'spreadsheet':
+                        blob = await convertSpreadsheet(state.currentFile, outputFormat, inputExt);
+                        break;
+                    case 'presentation':
+                        blob = await convertPresentation(state.currentFile, outputFormat);
+                        break;
+                    case 'archive':
+                        blob = await convertArchive(state.currentFile, outputFormat, inputExt);
+                        break;
+                    default:
+                        throw new Error('Unsupported file category');
+                }
+                
+                updateProgress(90, 'Finalizing...');
+                
+                state.convertedBlob = blob;
+                const originalName = state.currentFile.name.replace(/\.[^/.]+$/, '');
+                state.convertedFileName = `${originalName}.${outputFormat}`;
+                
+                updateProgress(100, 'Complete!');
+                
+                setTimeout(() => {
+                    showDownload(state.originalSize, blob.size);
+                }, 300);
+                
+            } catch (error) {
+                console.error('Conversion error:', error);
+                showError('Conversion Not Available', error.message);
+            }
+        }
+
+        elements.uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            elements.uploadArea.classList.add('drag-over');
+        });
+
+        elements.uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            elements.uploadArea.classList.remove('drag-over');
+        });
+
+        elements.uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            elements.uploadArea.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        elements.uploadArea.addEventListener('mousemove', (e) => {
+            const rect = elements.uploadArea.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            elements.uploadArea.style.setProperty('--mouse-x', `${x}%`);
+            elements.uploadArea.style.setProperty('--mouse-y', `${y}%`);
+        });
+
+        elements.fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        elements.qualitySlider.addEventListener('input', (e) => {
+            elements.qualityValue.textContent = `${e.target.value}%`;
+        });
+
+        elements.convertBtn.addEventListener('click', performConversion);
+
+        elements.downloadBtn.addEventListener('click', () => {
+            if (state.convertedBlob) {
+                const url = URL.createObjectURL(state.convertedBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = state.convertedFileName;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        });
+
+        elements.newConversionBtn.addEventListener('click', resetUI);
+
+        elements.retryBtn.addEventListener('click', () => {
+            elements.errorSection.classList.remove('visible');
+            elements.conversionOptions.style.display = 'block';
+        });
+
+        elements.removeBtn.addEventListener('click', resetUI);
+
+        elements.uploadArea.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                elements.fileInput.click();
+            }
+        });
+
+        elements.outputFormat.addEventListener('change', (e) => {
+            const format = e.target.value;
+            const showQuality = state.currentCategory === 'image' && ['jpg', 'webp'].includes(format);
+            elements.qualityGroup.style.display = showQuality ? 'block' : 'none';
+            
+            if (state.currentCategory === 'audio') {
+                elements.audioOptionsGroup.style.display = 'block';
+            }
+        });
+
+        console.log('RyConvert initialized.');
+    </script>
+</body>
+</html>
