@@ -1057,6 +1057,7 @@
             originalSize: 0
         };
 
+        // FIX: Added conversionOptions to the elements object so all references resolve correctly
         const elements = {
             uploadArea: document.getElementById('uploadArea'),
             fileInput: document.getElementById('fileInput'),
@@ -1073,6 +1074,7 @@
             previewVideo: document.getElementById('previewVideo'),
             textPreviewContainer: document.getElementById('textPreviewContainer'),
             previewText: document.getElementById('previewText'),
+            conversionOptions: document.getElementById('conversionOptions'),
             outputFormat: document.getElementById('outputFormat'),
             qualityGroup: document.getElementById('qualityGroup'),
             qualitySlider: document.getElementById('qualitySlider'),
@@ -1194,9 +1196,9 @@
             const category = detectCategory(extension);
             
             if (!category) {
-                showError('Unsupported Format', `.${extension} files are not supported.`);
                 elements.previewSection.classList.add('visible');
                 elements.conversionOptions.style.display = 'none';
+                showError('Unsupported Format', `.${extension} files are not supported.`);
                 return;
             }
             
@@ -1294,7 +1296,7 @@
         function encodeWAV(audioBuffer) {
             const numChannels = audioBuffer.numberOfChannels;
             const sampleRate = audioBuffer.sampleRate;
-            const format = 1; // PCM
+            const format = 1;
             const bitDepth = 16;
             
             const bytesPerSample = bitDepth / 8;
