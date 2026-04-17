@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RyConvert</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
-    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -95,6 +94,15 @@
             transition: all 0.3s ease;
         }
 
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 72rem;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
         .logo {
             font-family: 'Playfair Display', serif;
             font-size: 1.75rem;
@@ -114,6 +122,20 @@
             border-radius: 50%;
             margin-left: 2px;
             -webkit-text-fill-color: initial;
+        }
+
+        .header-status {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--fg-muted);
+            font-size: 0.875rem;
+        }
+
+        @media (min-width: 640px) {
+            .header-status {
+                display: flex;
+            }
         }
 
         .main-container {
@@ -811,11 +833,11 @@
     <div class="bg-noise"></div>
 
     <header class="header">
-        <div class="flex items-center justify-between max-w-6xl mx-auto">
+        <div class="header-inner">
             <div class="logo">
                 RyConvert<span class="logo-dot"></span>
             </div>
-            <div class="hidden sm:flex items-center gap-2 text-sm" style="color: var(--fg-muted);">
+            <div class="header-status">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                     <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
