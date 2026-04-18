@@ -1,17 +1,6 @@
 # ⚡ RyConvert
 
-**RyConvert** is a powerful, privacy-first file conversion tool that runs entirely in your browser. 
-
-No server uploads. No tracking. No file size limits. Just client-side conversion magic.
-
-## 🌟 Key Features
-
-- **🔒 100% Client-Side**: Your files never leave your device. All processing happens using modern browser APIs (Canvas, Web Audio, MediaRecorder).
-- **🚀 Zero Dependencies (Mostly)**: The core application runs on vanilla JavaScript. External libraries (JSZip, SheetJS, Marked) are loaded via CDN only when needed for specific formats.
-- **🎯 Smart Format Detection**: Automatically detects input file types and filters available output formats accordingly.
-- **🖼️ Rich Previews**: Instantly preview images, audio, video, and text content before converting.
-- **⚙️ Advanced Options**: Adjust quality, resolution, rotation, and flip settings for images.
-- **📊 Search & Browse**: A fully interactive format browser to discover supported conversions.
+**RyConvert** is a powerful, privacy-first file conversion tool with smart format detection, rich previews, advanced customization options, and an interactive format browser—all running mostly on vanilla JavaScript with minimal on-demand dependencies that runs entirely in your browser. 
 
 ## 🗂️ Supported Formats
 
